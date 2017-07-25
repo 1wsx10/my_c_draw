@@ -143,6 +143,7 @@ int main() {
 	RGBT blue;
 	RGBT randColour;
 	int i;
+	int screensaver = 1;
 
 	srand(time(NULL));
 
@@ -156,6 +157,8 @@ int main() {
 	drawCircle(data, 650, 420, 60, &blue);
 	drawCircle(data, 500, 25, 50, &green); */
 
+	while(screensaver) {
+		sleep(1);
 	/* draw some random circles */
 	for(i = 0; i < rand()%20; i++) {
 		randColour.r = rand()%255;
@@ -163,6 +166,7 @@ int main() {
 		randColour.b = rand()%255;
 		randColour.t = rand()%255;
 		drawCircle(data, rand()%data->vinfo.xres, rand()%data->vinfo.yres, rand()%(data->vinfo.xres/5), &randColour);
+	}
 	}
 
 	end(data);
