@@ -83,6 +83,9 @@ void draw(FBINFO *data, int x, int y, RGBT *colour) {
 		char *fbp = data->fbp;
         long int location = 0;
 
+		if(x < 0 || y < 0) { return; }
+		if(x >= vinfo.xres || y >= vinfo.yres) { return; }
+
         /* Figure out where in memory to put the pixel */
         location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y+vinfo.yoffset) * finfo.line_length;
 
