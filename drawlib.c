@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdlib.h>
+#include <time.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -140,15 +141,30 @@ int main() {
 	FBINFO *data = NULL;
 	RGBT green;
 	RGBT blue;
+	RGBT randColour;
+	int i;
+
+	srand(time(NULL));
+
 	green.g = 255;
 	blue.b = 255;
 
 	data = init();
+	/*
 	drawCircle(data, 20, 30, 5, &green);
 	drawCircle(data, 600, 500, 50, &green);
 	drawCircle(data, 650, 420, 60, &blue);
-	/* test clipping with screen edge */
-	drawCircle(data, 500, 25, 50, &green);
+	drawCircle(data, 500, 25, 50, &green); */
+
+	/* draw some random circles */
+	for(i = 0; i < rand()%20; i++) {
+		randColour.r = rand()%255;
+		randColour.g = rand()%255;
+		randColour.b = rand()%255;
+		randColour.t = rand()%255;
+		drawCircle(data, rand()%data->vinfo.xres, rand()%data->vinfo.yres, rand()%(data->vinfo.xres/5), &randColour);
+	}
+
 	end(data);
 	
 	return 0;
