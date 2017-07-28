@@ -7,6 +7,7 @@
 #include <linux/fb.h>
 #include <sys/mman.h>
 #include <math.h>
+#include <sys/time.h>
 
 typedef struct fbinfo {
 
@@ -24,6 +25,12 @@ typedef struct rgbt {
 	int b;
 	int t;
 } RGBT;
+
+typedef struct pixel {
+	int *x;
+	int *y;
+	RGBT *colour;
+} PIXEL;
 
 FBINFO* init() {
 		FBINFO *data = malloc(sizeof(*data));
@@ -78,22 +85,22 @@ FBINFO* init() {
 		return data;
 }
 
-void draw(FBINFO *data, int x, int y, RGBT *colour) {
+void draw(FBINFO *data, PIXEL *pixel) {
 		struct fb_var_screeninfo vinfo = data->vinfo;
         struct fb_fix_screeninfo finfo = data->finfo;
 		char *fbp = data->fbp;
         long int location = 0;
 
-		if(x < 0 || y < 0) { return; }
-		if(x >= vinfo.xres || y >= vinfo.yres) { return; }
+		if(*pixel->x < 0 || *pixel->y < 0) { return; }
+		if(*pixel->x >= vinfo.xres || *pixel->y >= vinfo.yres) { return; }
 
         /* Figure out where in memory to put the pixel */
-        location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (y+vinfo.yoffset) * finfo.line_length;
+        location = (*pixel->x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (*pixel->y+vinfo.yoffset) * finfo.line_length;
 
-        *(fbp + location + 0) = colour->b; /* blue */
-        *(fbp + location + 1) = colour->g; /* green */
-        *(fbp + location + 2) = colour->r; /* red */
-        *(fbp + location + 3) = colour->t; /* transparency */
+        *(fbp + location + 0) = pixel->colour->b; /* blue */
+        *(fbp + location + 1) = pixel->colour->g; /* green */
+        *(fbp + location + 2) = pixel->colour->r; /* red */
+        *(fbp + location + 3) = pixel->colour->t; /* transparency */
 }
 
 void end(FBINFO *data) {
@@ -105,7 +112,14 @@ void end(FBINFO *data) {
 void test() {
 	FBINFO *data = NULL;
 	int i = 0;
+	int x;
+	int y;
 	RGBT red;
+	PIXEL toDraw;
+	toDraw.x = &x;
+	toDraw.y = &y;
+	toDraw.colour = &red;
+
 	red.r = 255;
 
 	printf("init...\n");
@@ -113,7 +127,9 @@ void test() {
 
 	printf("writing some pixels...\n");
 	for(i = 0; i < 200; i++) {
-		draw(data, 20 + i, 20, &red);
+		x = 20+i;
+		y = 20;
+		draw(data, &toDraw);
 	}
 
 	printf("end...\n");
@@ -121,34 +137,88 @@ void test() {
 }
 
 
-void drawCircle(FBINFO *data, int x, int y, int r, RGBT *colour) {
+void drawCircle(FBINFO *data, int r, PIXEL *pixel) {
 	int i, j;
 	int rSqr = r*r;
+	PIXEL tempPix;
+	int t_x;
+	int t_y;
+	float randb;
+	float randa;
 
+	tempPix.colour = pixel->colour;
+	tempPix.x = &t_x;
+	tempPix.y = &t_y;
+
+	randa = (rand()%20)+1;
+	randb = (rand()%20)+1;
 	/* a*a + b*b = c*c */
 
 	/* pixels in the square contained by the circle */
-	for(i = -r; i < r; i++) {
-		for(j = -r; j < r; j++) {
-			if(i*i + j*j < rSqr) {
-				draw(data, x+i, y+j, colour);
+	for(j = -r; j < r; j++) {
+		for(i = -r; i < r; i++) {
+			if(i*i * ((randa/10)+1) + j*j * ((randb/20)+1) < rSqr) {
+				*tempPix.x = *pixel->x + i;
+				*tempPix.y = *pixel->y + j;
+				draw(data, &tempPix);
 			}
 		}
 	}
 }
 
+void clear_screen(FBINFO *data) {
+	int i;
+	int j;
+	PIXEL pixel;
+	RGBT black;
+	pixel.colour = &black;
+
+	for(j = 0; j < data->vinfo.yres; j++) {
+		for(i = 0; i < data->vinfo.xres; i++) {
+			pixel.x = &i;
+			pixel.y = &j;
+			draw(data, &pixel);
+		}
+	}
+}
+
+void rotate_about_point(PIXEL *pixel, int px, int py, float angle) {
+	*pixel->x -= px;
+	*pixel->y -= py;
+	
+	*pixel->x = (int)(*pixel->x * cos(angle) - *pixel->y * sin(angle));
+	*pixel->y = (int)(*pixel->x * sin(angle) + *pixel->y * cos(angle));
+
+	*pixel->x += px;
+	*pixel->y += py;
+}
+
+#define PI 3.14159f
+
 int main() {
 	FBINFO *data = NULL;
-	RGBT green;
-	RGBT blue;
+	/*RGBT green;
+	RGBT blue;*/
 	RGBT randColour;
 	int i;
+	int width;
+	int height;
 	int screensaver = 1;
+	int degrees;
+	float radians;
+	int temp_x;
+	int temp_y;
+	PIXEL randPixel;
+	struct timeval time_of_day;
+
+	randPixel.colour = &randColour;
+	randPixel.x = &temp_x;
+	randPixel.y = &temp_y;
 
 	srand(time(NULL));
 
-	green.g = 255;
-	blue.b = 255;
+	/*green.g = 255;
+	blue.b = 255;*/
 
 	data = init();
 	/*
@@ -156,17 +226,42 @@ int main() {
 	drawCircle(data, 600, 500, 50, &green);
 	drawCircle(data, 650, 420, 60, &blue);
 	drawCircle(data, 500, 25, 50, &green); */
-
-	while(screensaver) {
-		sleep(1);
-	/* draw some random circles */
-	for(i = 0; i < rand()%20; i++) {
+	while(screensaver && 0) {
+		sleep(0.1);
 		randColour.r = rand()%255;
 		randColour.g = rand()%255;
 		randColour.b = rand()%255;
 		randColour.t = rand()%255;
-		drawCircle(data, rand()%data->vinfo.xres, rand()%data->vinfo.yres, rand()%(data->vinfo.xres/5), &randColour);
+
+		gettimeofday(&time_of_day, NULL);
+
+		/*degrees = 60;*/
+		radians = sin(((double)time_of_day.tv_usec)/(1000000)) * 2 * PI;
+		for(height = 0+400; height < 100+400/*rand()%data->vinfo.yres*/; height++) {
+			for(width = 0+400; width < 100+400/*rand()%data->vinfo.xres*/; width++) {
+				temp_x = width;
+				temp_y = height;
+
+				rotate_about_point(&randPixel, 450, 450, radians);
+				draw(data, &randPixel);
+			}
+		}
 	}
+
+	while(screensaver) {
+		sleep(1);
+		/* draw some random circles */
+		for(i = 0; i < rand()%20; i++) {
+			randColour.r = rand()%255;
+			randColour.g = rand()%255;
+			randColour.b = rand()%255;
+			randColour.t = rand()%255;
+
+			*randPixel.x = rand()%data->vinfo.xres;
+			*randPixel.y = rand()%data->vinfo.yres;
+
+			drawCircle(data, rand()%(data->vinfo.xres/5), &randPixel);
+		}
 	}
 
 	end(data);
