@@ -2,17 +2,34 @@ SOURCES=drawlib.c
 OBJECTS=drawlib.o
 HEADERS=drawlib.h
 PROGRAM=a.out
-FLAGS= -ansi -lm -pedantic -Wall -g
+CFLAGS= -ansi -lm -pedantic -Wall
+LDFLAGS= -ansi -lm -pedantic -Wall
 
 all: $(PROGRAM)
 
 %.o: %.c $(HEADERS)
-	gcc $(FLAGS) -c $< -o $@
+	gcc $(CFLAGS) -c $< -o $@
 
 $(PROGRAM): $(OBJECTS)
-	gcc $(FLAGS) -o $@ $^
+	gcc $(LDFLAGS) -o $@ $^
 
-.PHONY:clean archive
+.PHONY:clean archive debug
+
+debug:clean all
+debug:
+CFLAGS+= -fsanitize=address -g
+
+debug:
+LDFLAGS+= -fsanitize=address -g
+
+debug:
+%.o: %.c $(HEADERS)
+	gcc $(CFLAGS) -c $< -o $@
+
+debug:
+$(PROGRAM): $(OBJECTS)
+	gcc $(LDFLAGS) -o $@ $^
+
 
 clean:
 	rm $(PROGRAM) $(OBJECTS)
