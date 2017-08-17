@@ -11,7 +11,7 @@ all: $(PROGRAM)
 	gcc $(CFLAGS) -c $< -o $@
 
 $(PROGRAM): $(OBJECTS)
-	gcc $(LDFLAGS) -o $@ $^
+	gcc -o $@ $^ $(LDFLAGS)
 
 .PHONY:clean archive debug
 
@@ -28,7 +28,7 @@ debug:
 
 debug:
 $(PROGRAM): $(OBJECTS)
-	gcc $(LDFLAGS) -o $@ $^
+	gcc -o $@ $^ $(LDFLAGS)
 
 
 clean:

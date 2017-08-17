@@ -8,6 +8,8 @@
 #include <sys/mman.h>
 #include <math.h>
 #include <sys/time.h>
+#include <errno.h>
+#include <string.h>
 
 typedef struct fbinfo {
 
@@ -42,15 +44,20 @@ FBINFO* init() {
 
         /* Open the file for reading and writing */
         fbfd = open("/dev/fb0", O_RDWR);
-        if (!fbfd) {
-                printf("Error: cannot open framebuffer device.\n");
+        if (fbfd == -1) {
+                fprintf(stderr, "%s:%d: Error: cannot open "
+                        "framebuffer device: %s\n",
+                        __FILE__,
+                        __LINE__-3,
+                        strerror(errno));
                 exit(1);
         }
         printf("The framebuffer device was opened successfully.\n");
 
 		/* Get fixed screen information */
         if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
-               printf("Error reading fixed information.\n");
+                fprintf(stderr, "Error reading fixed information: %s\n",
+                        strerror(errno));
                 exit(2);
         }
 
