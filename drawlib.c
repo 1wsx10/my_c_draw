@@ -39,24 +39,25 @@ FBINFO* init() {
         struct fb_fix_screeninfo finfo;
 		char *fbp;
         long int screensize = 0;
+		int error;
 
         /* Open the file for reading and writing */
-        fbfd = open("/dev/fb0", O_RDWR);
-        if (!fbfd) {
+        /*fbfd = open("/dev/fb0", O_RDWR);*/
+        if (!(fbfd = open("/dev/fb0", O_RDWR))) {
                 printf("Error: cannot open framebuffer device.\n");
                 exit(1);
         }
         printf("The framebuffer device was opened successfully.\n");
 
 		/* Get fixed screen information */
-        if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
-               printf("Error reading fixed information.\n");
-                exit(2);
+        if ((error = ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo))) {
+               printf("Error reading fixed information.\nerror code: %d\n", error);
+               exit(2);
         }
 
         /* Get variable screen information */
-        if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo)) {
-                printf("Error reading variable information.\n");
+        if ((error = ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo))) {
+                printf("Error reading variable information.\nerror code: %d\n", error);
                 exit(3);
         }
 		printf("Screen Size - x:%d y:%d\n", vinfo.xres, vinfo.yres);
@@ -236,7 +237,7 @@ void drawCircle(FBINFO *data, int r, PIXEL *pixel) {
 	/* pixels in the square contained by the circle */
 	for(j = -r; j < r; j++) {
 		for(i = -r; i < r; i++) {
-			if(i*i + j*j < rSqr) {
+			if(i*i + j*j/* (rand()%200+1)*/ < rSqr) {
 				*tempPix.x = *pixel->x + i;
 				*tempPix.y = *pixel->y + j;
 				draw(data, &tempPix);
@@ -294,6 +295,7 @@ int main() {
 	int temp_y;
 	PIXEL randPixel;
 	struct timeval time_of_day;
+	
 	CIRCLE_DATA circle_data;
 	OVAL_DATA oval_data;
 	PARABOLA_DATA parabola_data;
@@ -311,14 +313,22 @@ int main() {
 	randColour.b = rand()%255;
 	randColour.t = rand()%255;
 
+	test();
+
 	data = init();
 
+
+#define DRAWTESTa
+#ifdef DRAWTEST
+
+	/* circle */
 	*randPixel.x = 500;
 	*randPixel.y = 500;
 	circle_data.radius = 25;
 	circle_data.centre_offset = 25;
 	drawSpecialCircle(data, &randPixel, 50, &circle_data, &circle);
 
+	/* oval */
 	*randPixel.x = 550;
 	*randPixel.y = 500;
 	oval_data.radius = 25;
@@ -327,10 +337,12 @@ int main() {
 	oval_data.y_mul = 1.5;
 	drawSpecialCircle(data, &randPixel, 50, &oval_data, &oval);
 
+	/* square */
 	*randPixel.x = 600;
 	*randPixel.y = 500;
 	drawSpecialCircle(data, &randPixel, 50, NULL, &square);
 
+	/* parabola */
 	parabola_data.lge_flag = -1;
 	parabola_data.a = 0.04f;
 	parabola_data.b = -0.6f;
@@ -340,14 +352,27 @@ int main() {
 	*randPixel.y = 500;
 	drawSpecialCircle(data, &randPixel, 50, &parabola_data, &parabola);
 
+#endif
+
 	while(screensaver && 0) {
 		sleep(0.1);
 
 		gettimeofday(&time_of_day, NULL);
 
-		randColour.r = (int)(sin(PI * ((double)time_of_day.tv_usec)/1000000) * 255);
-		randColour.r = (int)(cos(PI * ((double)time_of_day.tv_usec)/1000000) * 255);
-		randColour.r = (int)(sin(PI * 0.5 + PI * ((double)time_of_day.tv_usec)/1000000) * 255);
+#define USETIMEFORRANDOMSQUARE
+#ifdef USETIMEFORRANDOMSQUARE
+		randColour.r = (int)(sin(PI * (((double)time_of_day.tv_usec)/1000000) + time_of_day.tv_sec%10) * 255);
+		randColour.g = (int)(sin(PI * (((double)time_of_day.tv_usec)/1000000) + time_of_day.tv_sec%20) * 255);
+		randColour.b = (int)(sin(PI * (((double)time_of_day.tv_usec)/1000000) + time_of_day.tv_sec%5) * 255);
+		
+#endif
+#ifndef USETIMEFORRANDOMSQUARE
+		
+		randColour.r = rand()%255;
+		randColour.g = rand()%255;
+		randColour.b = rand()%255;
+		randColour.t = rand()%255;
+#endif
 
 		/*degrees = 60;*/
 		radians = sin(PI * ((double)time_of_day.tv_usec)/(1000000)) * 2 * PI;
@@ -363,7 +388,6 @@ int main() {
 	}
 
 	while(screensaver && 0) {
-		sleep(1);
 		/* draw some random circles */
 		for(i = 0; i < rand()%20; i++) {
 			randColour.r = rand()%255;

@@ -2,8 +2,8 @@ SOURCES=drawlib.c
 OBJECTS=drawlib.o
 HEADERS=drawlib.h
 PROGRAM=a.out
-CFLAGS= -ansi -lm -pedantic -Wall
-LDFLAGS= -ansi -lm -pedantic -Wall
+CFLAGS= -lm -pedantic -Wall
+LDFLAGS= -lm -pedantic -Wall
 
 all: $(PROGRAM)
 
