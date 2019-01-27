@@ -1,9 +1,9 @@
-SOURCES=drawlib.c
-OBJECTS=drawlib.o
+SOURCES=drawlib.c main.c 
+OBJECTS=drawlib.o main.o
 HEADERS=drawlib.h
 PROGRAM=a.out
-CFLAGS= -lm -pedantic -Wall
-LDFLAGS= -lm -pedantic -Wall
+CFLAGS= -lm -pedantic -Wall -g
+LDFLAGS= -lm -pedantic -Wall -g
 
 all: $(PROGRAM)
 
@@ -16,11 +16,9 @@ $(PROGRAM): $(OBJECTS)
 .PHONY:clean archive debug
 
 debug:clean all
-debug:
-CFLAGS+= -fsanitize=address -g
+debug: CFLAGS+= -fsanitize=address
 
-debug:
-LDFLAGS+= -fsanitize=address -g
+debug: LDFLAGS+= -fsanitize=address
 
 debug:
 %.o: %.c $(HEADERS)
