@@ -2,6 +2,8 @@ SOURCES=drawlib.c main.c
 OBJECTS=drawlib.o main.o
 HEADERS=drawlib.h
 PROGRAM=a.out
+
+#TODO remove -g when building properly
 CFLAGS= -lm -pedantic -Wall -g
 LDFLAGS= -lm -pedantic -Wall -g
 
@@ -11,7 +13,7 @@ all: $(PROGRAM)
 	gcc $(CFLAGS) -c $< -o $@
 
 $(PROGRAM): $(OBJECTS)
-	gcc $(LDFLAGS) -o $@ $^
+	gcc -o $@ $^ $(LDFLAGS)
 
 .PHONY:clean archive debug
 
@@ -26,7 +28,7 @@ debug:
 
 debug:
 $(PROGRAM): $(OBJECTS)
-	gcc $(LDFLAGS) -o $@ $^
+	gcc -o $@ $^ $(LDFLAGS)
 
 
 clean:

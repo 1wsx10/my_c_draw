@@ -12,17 +12,22 @@ FBINFO* init() {
 		int error;
 
         /* Open the file for reading and writing */
-        /*fbfd = open("/dev/fb0", O_RDWR);*/
-        if (!(fbfd = open("/dev/fb0", O_RDWR))) {
-                printf("Error: cannot open framebuffer device.\n");
+        fbfd = open("/dev/fb0", O_RDWR);
+        if (fbfd == -1) {
+                fprintf(stderr, "%s:%d: Error: cannot open "
+                        "framebuffer device: %s\n",
+                        __FILE__,
+                        __LINE__-3,
+                        strerror(errno));
                 exit(1);
         }
         printf("The framebuffer device was opened successfully.\n");
 
 		/* Get fixed screen information */
-        if ((error = ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo))) {
-               printf("Error reading fixed information.\nerror code: %d\n", error);
-               exit(2);
+        if (ioctl(fbfd, FBIOGET_FSCREENINFO, &finfo)) {
+                fprintf(stderr, "Error reading fixed information: %s\n",
+                        strerror(errno));
+                exit(2);
         }
 
         /* Get variable screen information */

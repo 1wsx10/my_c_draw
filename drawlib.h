@@ -11,6 +11,8 @@
 #include <sys/mman.h>
 #include <math.h>
 #include <sys/time.h>
+#include <errno.h>
+#include <string.h>
 
 
 
