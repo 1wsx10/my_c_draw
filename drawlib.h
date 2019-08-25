@@ -1,6 +1,10 @@
 #ifndef DRAWLIB_H
 #define DRAWLIB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
@@ -143,4 +147,7 @@ void rotate_about_point(PIXEL *pixel, int px, int py, float angle);
 
 
 
+#ifdef __cplusplus
+}
+#endif
 #endif
