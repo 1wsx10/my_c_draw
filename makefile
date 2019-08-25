@@ -9,13 +9,18 @@ LDFLAGS= -lm -pedantic -Wall -g
 
 all: $(PROGRAM)
 
+library: libdraw.a
+
+libdraw.a: drawlib.o
+	ar rcs libdraw.a drawlib.o
+
 %.o: %.c $(HEADERS)
 	gcc $(CFLAGS) -c $< -o $@
 
 $(PROGRAM): $(OBJECTS)
 	gcc -o $@ $^ $(LDFLAGS)
 
-.PHONY:clean archive debug
+.PHONY: all clean archive debug
 
 debug:clean all
 debug: CFLAGS+= -fsanitize=address
@@ -32,7 +37,7 @@ $(PROGRAM): $(OBJECTS)
 
 
 clean:
-	rm $(PROGRAM) $(OBJECTS)
+	-rm *.a *.o $(PROGRAM)
 
 archive:
 	zip $(USER)-a2 $(SOURCES) $(HEADERS) Makefile
