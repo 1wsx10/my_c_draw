@@ -91,13 +91,13 @@ void test() {
 	int i = 0;
 	int x;
 	int y;
-	RGBT red;
+	RGBT red = {.r=255, .g=0, .b=0, .t=0};
 	PIXEL toDraw;
 	toDraw.x = &x;
 	toDraw.y = &y;
 	toDraw.colour = &red;
 
-	red.r = 255;
+	//red.r = 255;
 
 	printf("init...\n");
 	data = init();
@@ -205,7 +205,7 @@ void clear_screen(FBINFO *data) {
 	int i;
 	int j;
 	PIXEL pixel;
-	RGBT black;
+	RGBT black = {0,0,0,0};
 	pixel.colour = &black;
 
 	for(j = 0; j < data->vinfo.yres; j++) {
