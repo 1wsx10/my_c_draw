@@ -4,10 +4,12 @@ HEADERS=drawlib.h
 PROGRAM=a.out
 
 #TODO remove -g when building properly
-CFLAGS= -lm -pedantic -Wall -g
-LDFLAGS= -lm -pedantic -Wall -g
+#CFLAGS= -lm -pedantic -Wall -g
+#LDFLAGS= -lm -pedantic -Wall -g
+CFLAGS= -lm -pedantic -Wall -O3
+LDFLAGS= -lm -pedantic -Wall -O3
 
-all: $(PROGRAM)
+all: $(PROGRAM) library
 
 %.o: %.c $(HEADERS)
 	gcc $(CFLAGS) -c $< -o $@

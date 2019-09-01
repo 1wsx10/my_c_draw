@@ -73,10 +73,11 @@ void draw(FBINFO *data, PIXEL *pixel) {
         /* Figure out where in memory to put the pixel */
         location = (*pixel->x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (*pixel->y+vinfo.yoffset) * finfo.line_length;
 
-        *(fbp + location + 0) = pixel->colour->b; /* blue */
-        *(fbp + location + 1) = pixel->colour->g; /* green */
-        *(fbp + location + 2) = pixel->colour->r; /* red */
-        *(fbp + location + 3) = pixel->colour->t; /* transparency */
+				// make it volatile so that it doesn't get optimised out
+        ((char volatile *)fbp)[location + 0] = pixel->colour->b; /* blue */
+        ((char volatile *)fbp)[location + 1] = pixel->colour->g; /* green */
+        ((char volatile *)fbp)[location + 2] = pixel->colour->r; /* red */
+        //((char volatile *)fbp)[location + 3] = pixel->colour->t; /* transparency */
 }
 
 void end(FBINFO *data) {
