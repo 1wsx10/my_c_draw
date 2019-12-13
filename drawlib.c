@@ -35,10 +35,10 @@ FBINFO* init() {
 		printf("Error reading variable information.\nerror code: %d\n", error);
 		exit(3);
 	}
-	printf("Screen Size - x:%d y:%d\n", vinfo.xres, vinfo.yres);
+	printf("Screen Size - x:%d y:%d\n", vinfo.xres_virtual, vinfo.yres_virtual);
 
 	/* Figure out the size of the screen in bytes */
-	screensize = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
+	screensize = vinfo.xres_virtual * vinfo.yres_virtual * vinfo.bits_per_pixel / 8;
 	printf("Screen size is %ld\n",screensize);
 	printf("Vinfo.bpp = %d\n",vinfo.bits_per_pixel);
 
@@ -68,7 +68,7 @@ FBINFO* init() {
 		long int location = 0;
 
 		if(*pixel->x < 0 || *pixel->y < 0) { return; }
-		if(*pixel->x >= vinfo.xres || *pixel->y >= vinfo.yres) { return; }
+		if(*pixel->x >= vinfo.xres_virtual || *pixel->y >= vinfo.yres_virtual) { return; }
 
 		/* Figure out where in memory to put the pixel */
 		location = (*pixel->x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) + (*pixel->y+vinfo.yoffset) * finfo.line_length;
